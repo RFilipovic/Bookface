@@ -1,4 +1,4 @@
-package com.bookface.comms.entity;
+package com.bookface.comms.domain;
 
 import jakarta.persistence.*;
 
