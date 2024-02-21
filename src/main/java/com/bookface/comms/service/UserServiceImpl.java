@@ -1,6 +1,7 @@
 package com.bookface.comms.service;
 import com.bookface.comms.domain.User;
 import com.bookface.comms.domain.repository.UserRepository;
+import com.bookface.comms.exception.ApiRequestException;
 import com.bookface.comms.service.request.CreateUserRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService{
 
     private void validateUserRequest(CreateUserRequest userRequest) {
         if (userRequest == null || StringUtils.isAnyBlank(userRequest.getName(), userRequest.getEmail(), userRequest.getPassword())) {
-            throw new IllegalArgumentException("Invalid registration request, try again.");
+            throw new ApiRequestException("Invalid registration request, try again.");
         }
     }
 }
