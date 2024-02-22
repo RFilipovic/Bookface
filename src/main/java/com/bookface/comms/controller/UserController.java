@@ -1,6 +1,7 @@
 package com.bookface.comms.controller;
 
 import com.bookface.comms.service.UserService;
+import com.bookface.comms.service.request.CreateLoginRequest;
 import com.bookface.comms.service.request.CreateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,15 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> addUser(@RequestBody CreateUserRequest userRequest){
+    public ResponseEntity<String> registerUser(@RequestBody CreateUserRequest userRequest){
         userService.addUser(userRequest);
         return ResponseEntity.ok("Account successfully created!");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody CreateLoginRequest loginRequest){
+        userService.loginValid(loginRequest);   //if login is invalid throw exception
+        //if no exception generate jwt token
+        return ResponseEntity.ok("magus");
     }
 }
