@@ -1,52 +1,68 @@
 package com.bookface.comms.service;
+import com.bookface.comms.domain.Role;
 import com.bookface.comms.domain.User;
 import com.bookface.comms.domain.repository.UserRepository;
 import com.bookface.comms.exception.ApiRequestException;
+import com.bookface.comms.security.AuthenticationResponse;
+import com.bookface.comms.security.JwtService;
 import com.bookface.comms.service.request.CreateLoginRequest;
 import com.bookface.comms.service.request.CreateUserRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServiceImpl implements UserService{
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     @Override
-    public void addUser(CreateUserRequest userRequest) {
+    public AuthenticationResponse addUser(CreateUserRequest userRequest) {
         validateUserRequest(userRequest);
         User user = new User();
-        user.setName(userRequest.getName());
+        user.setName(userRequest.getUsername());
         user.setEmail(userRequest.getEmail());
-        user.setPassword(userRequest.getPassword());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        user.setRole(Role.USER);
         userRepository.save(user);
+        String jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     @Override
-    public void loginValid(CreateLoginRequest loginRequest) {
-        validateLoginRequest(loginRequest);
-        isTrueLogin(loginRequest);
+    public AuthenticationResponse loginValid(CreateLoginRequest loginRequest) {
+
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequest.getUsername(),
+                loginRequest.getPassword()
+        ));
+        User user = userRepository
+                .findByName(loginRequest.getUsername())
+                .orElseThrow(() -> new ApiRequestException("Username not found."));
+        String jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     private void validateUserRequest(CreateUserRequest userRequest) {
-        if (userRequest == null || StringUtils.isAnyBlank(userRequest.getName(), userRequest.getEmail(), userRequest.getPassword()))
+        if (userRequest == null || StringUtils.isAnyBlank(userRequest.getUsername(), userRequest.getEmail(), userRequest.getPassword()))
             throw new ApiRequestException("Invalid registration request, try again.");
     }
 
-    private void validateLoginRequest(CreateLoginRequest loginRequest) {
-        if (loginRequest == null || StringUtils.isAnyBlank(loginRequest.getUsername(), loginRequest.getPassword()))
-            throw new ApiRequestException("Invalid login attempt.");
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByName(username).orElse(null);
     }
 
-    public void isTrueLogin(CreateLoginRequest loginRequest){
-        User user = userRepository.findByName(loginRequest.getUsername());
-        if(user == null || !user.getPassword().equals(loginRequest.getPassword()))
-            throw new ApiRequestException("Username or password does not match.");
-    }
+
 }

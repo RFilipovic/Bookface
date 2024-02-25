@@ -1,17 +1,14 @@
 package com.bookface.comms.controller;
-
+import com.bookface.comms.security.AuthenticationResponse;
 import com.bookface.comms.service.UserService;
 import com.bookface.comms.service.request.CreateLoginRequest;
 import com.bookface.comms.service.request.CreateUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/api")
+@RestController
+@RequestMapping("/api/auth")
 public class UserController {
 
     private final UserService userService;
@@ -22,15 +19,13 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody CreateUserRequest userRequest){
-        userService.addUser(userRequest);
-        return ResponseEntity.ok("Account successfully created!");
+    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody CreateUserRequest userRequest){
+        return ResponseEntity.ok(userService.addUser(userRequest));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody CreateLoginRequest loginRequest){
-        userService.loginValid(loginRequest);   //if login is invalid throw exception
-        //if no exception generate jwt token
-        return ResponseEntity.ok("magus");
+    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody CreateLoginRequest loginRequest){
+        return ResponseEntity.ok(userService.loginValid(loginRequest));
     }
+
 }
