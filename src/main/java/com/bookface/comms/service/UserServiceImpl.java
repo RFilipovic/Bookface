@@ -3,7 +3,7 @@ import com.bookface.comms.domain.Role;
 import com.bookface.comms.domain.User;
 import com.bookface.comms.domain.repository.UserRepository;
 import com.bookface.comms.exception.ApiRequestException;
-import com.bookface.comms.security.AuthenticationResponse;
+import com.bookface.comms.security.AuthResponse;
 import com.bookface.comms.security.JwtService;
 import com.bookface.comms.service.request.CreateLoginRequest;
 import com.bookface.comms.service.request.CreateUserRequest;
@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public AuthenticationResponse addUser(CreateUserRequest userRequest) {
+    public AuthResponse addUser(CreateUserRequest userRequest) {
         validateUserRequest(userRequest);
         User user = new User();
         user.setName(userRequest.getUsername());
@@ -33,13 +33,14 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.USER);
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
+        return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
     }
 
     @Override
-    public AuthenticationResponse loginValid(CreateLoginRequest loginRequest) {
+    public AuthResponse loginValid(CreateLoginRequest loginRequest) {
+        validateLoginRequest(loginRequest);
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getUsername(),
@@ -49,14 +50,19 @@ public class UserServiceImpl implements UserService {
                 .findByName(loginRequest.getUsername())
                 .orElseThrow(() -> new ApiRequestException("Username not found."));
         String jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
+        return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
     }
 
+    public void validateLoginRequest(CreateLoginRequest loginRequest){
+        if(loginRequest == null || StringUtils.isAnyBlank(loginRequest.getUsername(), loginRequest.getPassword()))
+            throw new ApiRequestException("All fields must be filled in the login form.");
+    }
+
     private void validateUserRequest(CreateUserRequest userRequest) {
         if (userRequest == null || StringUtils.isAnyBlank(userRequest.getUsername(), userRequest.getEmail(), userRequest.getPassword()))
-            throw new ApiRequestException("Invalid registration request, try again.");
+            throw new ApiRequestException("All fields must be filled in the registration form.");
     }
 
     @Override

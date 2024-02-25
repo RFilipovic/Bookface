@@ -1,8 +1,15 @@
 package com.bookface.comms.domain;
-
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "friend")
 public class Friend {
 
@@ -21,38 +28,4 @@ public class Friend {
     @Column(name = "status")
     private RequestStatus status;
 
-    public Friend(){
-    }
-
-    public RequestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RequestStatus status) {
-        this.status = status;
-    }
-
-    public Long getFriendshipId() {
-        return friendshipId;
-    }
-
-    public void setFriendshipId(Long friendshipId) {
-        this.friendshipId = friendshipId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getFriendId() {
-        return friendId;
-    }
-
-    public void setFriendId(Long friendId) {
-        this.friendId = friendId;
-    }
 }

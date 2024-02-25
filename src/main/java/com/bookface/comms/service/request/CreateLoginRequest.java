@@ -1,25 +1,11 @@
 package com.bookface.comms.service.request;
 
-public class CreateLoginRequest {
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+public class CreateLoginRequest {
     private String username;
     private String password;
-
-    public CreateLoginRequest(){}
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

@@ -1,5 +1,5 @@
 package com.bookface.comms.controller;
-import com.bookface.comms.security.AuthenticationResponse;
+import com.bookface.comms.security.AuthResponse;
 import com.bookface.comms.service.UserService;
 import com.bookface.comms.service.request.CreateLoginRequest;
 import com.bookface.comms.service.request.CreateUserRequest;
@@ -19,12 +19,12 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody CreateUserRequest userRequest){
+    public ResponseEntity<AuthResponse> registerUser(@RequestBody CreateUserRequest userRequest){
         return ResponseEntity.ok(userService.addUser(userRequest));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody CreateLoginRequest loginRequest){
+    public ResponseEntity<AuthResponse> loginUser(@RequestBody CreateLoginRequest loginRequest){
         return ResponseEntity.ok(userService.loginValid(loginRequest));
     }
 
