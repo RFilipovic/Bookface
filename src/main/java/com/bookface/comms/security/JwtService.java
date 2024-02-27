@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class JwtService {
@@ -31,6 +32,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .setSubject(user.getName())
+                .claim("user_id", user.getUserId())
                 .claim("email", user.getEmail())
                 .setIssuedAt(now)
                 .setExpiration(expiriyDate)
@@ -60,6 +62,14 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Long extractUserId(String token){
+        Integer userIdInteger = extractClaim(token, claims -> claims.get("user_id", Integer.class));
+        Long userIdLong = userIdInteger.longValue();
+        System.out.println("Extracted User ID (Integer): " + userIdInteger);
+        System.out.println("Extracted User ID (Long): " + userIdLong);
+        return userIdLong;
+    }
+
     public Date extractExpiration(String token){
         return extractClaim(token, Claims::getExpiration);
     }
@@ -73,4 +83,11 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
+    public void setExpiration(long l) {
+        this.expiration = l;
+    }
+
+    public void setSecret(String sha256) {
+        this.SECRET_KEY = sha256;
+    }
 }

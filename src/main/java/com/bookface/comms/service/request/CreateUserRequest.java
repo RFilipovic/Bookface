@@ -1,5 +1,4 @@
 package com.bookface.comms.service.request;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

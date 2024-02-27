@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CreateLoginRequest {
-    private String username;
-    private String password;
+public class CreateFriendRequest {
+    private Long senderId;
+    private Long recipientId;
 }
