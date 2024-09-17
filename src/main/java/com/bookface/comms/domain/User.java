@@ -25,7 +25,7 @@ public class User implements UserDetails {
     private Long userId;
 
     @Column(name = "username")
-    private String name;
+    private String username;
 
     @Column(name = "email")
     private String email;
@@ -33,18 +33,13 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public String getUsername() {
-        return name;
     }
 
     @Override

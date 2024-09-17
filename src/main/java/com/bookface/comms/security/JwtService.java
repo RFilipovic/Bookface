@@ -11,16 +11,13 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class JwtService {
 
     @Value("${jwt.secret}")
     private String SECRET_KEY;
-
     //private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
-    //404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
 
     @Value("${jwt.expiration}")
     private Long expiration;
@@ -31,7 +28,7 @@ public class JwtService {
         Date expiriyDate = new Date(now.getTime() + expiration * 1000);
 
         return Jwts.builder()
-                .setSubject(user.getName())
+                .setSubject(user.getUsername())
                 .claim("user_id", user.getUserId())
                 .claim("email", user.getEmail())
                 .setIssuedAt(now)
@@ -81,13 +78,5 @@ public class JwtService {
 
     private boolean isTokenExpired(String token){
         return extractExpiration(token).before(new Date());
-    }
-
-    public void setExpiration(long l) {
-        this.expiration = l;
-    }
-
-    public void setSecret(String sha256) {
-        this.SECRET_KEY = sha256;
     }
 }

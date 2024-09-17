@@ -24,40 +24,15 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public AuthResponse addUser(CreateUserRequest userRequest) {
-        validateUserRequest(userRequest);
-        User user = new User();
-        user.setName(userRequest.getUsername());
-        user.setEmail(userRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        user.setRole(Role.USER);
+    public AuthResponse registerUser(CreateUserRequest userRequest) {
+        User user = createUserOnValidRequest(userRequest);
         userRepository.save(user);
-        String jwtToken = jwtService.generateToken(user);
-        return AuthResponse.builder()
-                .token(jwtToken)
-                .build();
+        return getAuthToken(user);
     }
 
-    @Override
-    public AuthResponse loginValid(CreateLoginRequest loginRequest) {
-        validateLoginRequest(loginRequest);
-
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginRequest.getUsername(),
-                loginRequest.getPassword()
-        ));
-        User user = userRepository
-                .findByName(loginRequest.getUsername())
-                .orElseThrow(() -> new ApiRequestException("Username not found."));
-        String jwtToken = jwtService.generateToken(user);
-        return AuthResponse.builder()
-                .token(jwtToken)
-                .build();
-    }
-
-    public void validateLoginRequest(CreateLoginRequest loginRequest){
-        if(loginRequest == null || StringUtils.isAnyBlank(loginRequest.getUsername(), loginRequest.getPassword()))
-            throw new ApiRequestException("All fields must be filled in the login form.");
+    public User createUserOnValidRequest(CreateUserRequest userRequest) {
+        validateUserRequest(userRequest);
+        return createUserObject(userRequest);
     }
 
     private void validateUserRequest(CreateUserRequest userRequest) {
@@ -65,10 +40,46 @@ public class UserServiceImpl implements UserService {
             throw new ApiRequestException("All fields must be filled in the registration form.");
     }
 
-    @Override
-    public User findByUsername(String username) {
-        return userRepository.findByName(username).orElse(null);
+    public User createUserObject (CreateUserRequest userRequest){
+        User user = new User();
+        user.setUsername(userRequest.getUsername());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        user.setRole(Role.USER);
+        return user;
     }
 
+    private AuthResponse getAuthToken(User user) {
+        String jwtToken = jwtService.generateToken(user);
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .build();
+    }
+
+    @Override
+    public AuthResponse loginUser(CreateLoginRequest loginRequest) {
+        User user = getUserOnAuthenticatedLoginRequest(loginRequest);
+        return getAuthToken(user);
+    }
+
+    private User getUserOnAuthenticatedLoginRequest(CreateLoginRequest loginRequest){
+        authenticateLoginRequest(loginRequest);
+        return userRepository
+                .findByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new ApiRequestException("Username does not exist."));
+    }
+
+    private void authenticateLoginRequest(CreateLoginRequest loginRequest) {
+        validateLoginRequest(loginRequest);
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequest.getUsername(),
+                loginRequest.getPassword()
+        ));
+    }
+
+    public void validateLoginRequest(CreateLoginRequest loginRequest){
+        if(loginRequest == null || StringUtils.isAnyBlank(loginRequest.getUsername(), loginRequest.getPassword()))
+            throw new ApiRequestException("All fields must be filled in the login form.");
+    }
 
 }

@@ -1,11 +1,8 @@
 package com.bookface.comms.security;
-import com.bookface.comms.domain.User;
-import com.bookface.comms.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +18,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -34,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
+    public void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -46,8 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if(header != null && header.startsWith("Bearer ")){
             token = header.substring(7);
             username = jwtService.extractUsername(token);
+
             if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
                 UserDetails user = this.userDetailsService.loadUserByUsername(username);
+
                 if(jwtService.isTokenValid(token, user)){
                     Collection<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null, authorities);

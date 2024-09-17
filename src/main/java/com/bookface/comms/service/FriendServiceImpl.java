@@ -28,6 +28,8 @@ public class FriendServiceImpl implements FriendService{
     @Override
     public void sendFriendRequest(CreateFriendRequest friendRequest, String token) {
 
+        token = token.substring(7);
+
         if((Objects.equals(friendRequest.getSenderId(), jwtService.extractUserId(token)))
                 && userExists(friendRequest.getRecipientId())){
 

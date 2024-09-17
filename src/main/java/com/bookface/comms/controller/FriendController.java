@@ -1,9 +1,11 @@
 package com.bookface.comms.controller;
+import com.bookface.comms.exception.ApiRequestException;
 import com.bookface.comms.service.FriendService;
 import com.bookface.comms.service.request.CreateFriendRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/friends")
@@ -25,7 +27,4 @@ public class FriendController {
         friendService.sendFriendRequest(friendRequest, token);
         return ResponseEntity.ok("Friend request has been sent.");
     }
-
-    //accept or decline the request
-
 }

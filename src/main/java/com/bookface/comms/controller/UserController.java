@@ -20,12 +20,12 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> registerUser(@RequestBody CreateUserRequest userRequest){
-        return ResponseEntity.ok(userService.addUser(userRequest));
+        return ResponseEntity.ok(userService.registerUser(userRequest));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginUser(@RequestBody CreateLoginRequest loginRequest){
-        return ResponseEntity.ok(userService.loginValid(loginRequest));
+        return ResponseEntity.ok(userService.loginUser(loginRequest));
     }
 
 }
