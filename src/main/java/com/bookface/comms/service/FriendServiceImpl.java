@@ -8,7 +8,6 @@ import com.bookface.comms.security.JwtService;
 import com.bookface.comms.service.request.CreateFriendRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 
 @Service
@@ -27,27 +26,36 @@ public class FriendServiceImpl implements FriendService{
 
     @Override
     public void sendFriendRequest(CreateFriendRequest friendRequest, String token) {
-
-        token = token.substring(7);
-
-        if((Objects.equals(friendRequest.getSenderId(), jwtService.extractUserId(token)))
-                && userExists(friendRequest.getRecipientId())){
-
-            Friend friend = Friend.builder()
-                    .userId(friendRequest.getSenderId())
-                    .friendId(friendRequest.getRecipientId())
-                    .status(RequestStatus.PENDING)
-                    .build();
-            friendRepository.save(friend);
-
-        }else throw new ApiRequestException("The user doesn't exist.");
+        token = parseToken(token);
+        validateFriendRequest(friendRequest, token);
+        Friend friend = createFriendRequestOnValidData(friendRequest, token);
+        friendRepository.save(friend);
     }
 
-    private boolean userExists(Long senderId) {
-        userRepository.findById(senderId)
-                .orElseThrow(() ->new ApiRequestException("The user doesn't exist."));
-        return true;
+    private String parseToken(String token){
+        return token.substring(7);
     }
 
+    private void validateFriendRequest(CreateFriendRequest friendRequest, String token){
+        checkForSelfRequest(friendRequest, token);
+        userExists(friendRequest);
+    }
 
+    private void checkForSelfRequest(CreateFriendRequest friendRequest, String token){
+        if(Objects.equals(friendRequest.getRecipientId(), jwtService.extractUserId(token)))
+            throw new ApiRequestException("Cannot send a friend request to yourself.");
+    }
+
+    private void userExists(CreateFriendRequest friendRequest){
+        if(userRepository.findByUserId(friendRequest.getRecipientId()).isEmpty())
+            throw new ApiRequestException("User does not exist.");
+    }
+
+    private Friend createFriendRequestOnValidData(CreateFriendRequest friendRequest, String token){
+        return Friend.builder()
+                .userId(jwtService.extractUserId(token))
+                .friendId(friendRequest.getRecipientId())
+                .status(RequestStatus.PENDING)
+                .build();
+    }
 }

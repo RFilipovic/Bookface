@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         return getAuthToken(user);
     }
 
-    public User createUserOnValidRequest(CreateUserRequest userRequest) {
+    private User createUserOnValidRequest(CreateUserRequest userRequest) {
         validateUserRequest(userRequest);
         return createUserObject(userRequest);
     }
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
             throw new ApiRequestException("All fields must be filled in the registration form.");
     }
 
-    public User createUserObject (CreateUserRequest userRequest){
+    private User createUserObject (CreateUserRequest userRequest){
         User user = new User();
         user.setUsername(userRequest.getUsername());
         user.setEmail(userRequest.getEmail());
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
         ));
     }
 
-    public void validateLoginRequest(CreateLoginRequest loginRequest){
+    private void validateLoginRequest(CreateLoginRequest loginRequest){
         if(loginRequest == null || StringUtils.isAnyBlank(loginRequest.getUsername(), loginRequest.getPassword()))
             throw new ApiRequestException("All fields must be filled in the login form.");
     }

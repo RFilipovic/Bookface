@@ -13,13 +13,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {ApiRequestException.class})
     public ResponseEntity<Object> handleApiRequestException(ApiRequestException e){
-
         ApiException apiException = new ApiException(
                 e.getMessage(),
                 HttpStatus.BAD_REQUEST,
                 ZonedDateTime.now(ZoneId.of("Z"))
         );
-
         return new ResponseEntity<>(apiException,HttpStatus.BAD_REQUEST);
     }
 }

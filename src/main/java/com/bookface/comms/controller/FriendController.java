@@ -1,11 +1,9 @@
 package com.bookface.comms.controller;
-import com.bookface.comms.exception.ApiRequestException;
 import com.bookface.comms.service.FriendService;
 import com.bookface.comms.service.request.CreateFriendRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/friends")
@@ -18,7 +16,6 @@ public class FriendController {
         this.friendService = friendService;
     }
 
-    //send friend request
     @PostMapping("/requests")
     public ResponseEntity<String> sendFriendRequest(
             @RequestBody CreateFriendRequest friendRequest,
