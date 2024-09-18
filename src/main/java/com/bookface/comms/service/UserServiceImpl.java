@@ -50,16 +50,14 @@ public class UserServiceImpl implements UserService {
     }
 
     private AuthResponse getAuthToken(User user) {
-        String jwtToken = jwtService.generateToken(user);
         return AuthResponse.builder()
-                .token(jwtToken)
+                .token(jwtService.generateToken(user))
                 .build();
     }
 
     @Override
     public AuthResponse loginUser(CreateLoginRequest loginRequest) {
-        User user = getUserOnAuthenticatedLoginRequest(loginRequest);
-        return getAuthToken(user);
+        return getAuthToken(getUserOnAuthenticatedLoginRequest(loginRequest));
     }
 
     private User getUserOnAuthenticatedLoginRequest(CreateLoginRequest loginRequest){

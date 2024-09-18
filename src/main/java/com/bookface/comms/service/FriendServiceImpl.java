@@ -29,13 +29,10 @@ public class FriendServiceImpl implements FriendService{
 
     @Override
     public void sendFriendRequest(CreateFriendRequest friendRequest, String token) {
-        token = parseToken(token);
-        Friend friend = createFriendRequestOnValidData(friendRequest, token);
-        friendRepository.save(friend);
-    }
-
-    private String parseToken(String token){
-        return token.substring(7);
+        friendRepository.save(createFriendRequestOnValidData(
+                friendRequest,
+                token.substring(7))
+        );
     }
 
     private Friend createFriendRequestOnValidData(CreateFriendRequest friendRequest, String token){
@@ -70,16 +67,15 @@ public class FriendServiceImpl implements FriendService{
 
     @Override
     public void updateFriendRequest(CreateFriendRequestUpdate updateRequest, String token) {
-        token = parseToken(token);
-        updateFriendRequestOnValidData(updateRequest, token);
+        updateFriendRequestOnValidData(updateRequest, token.substring(7));
     }
 
     private void updateFriendRequestOnValidData(CreateFriendRequestUpdate updateRequest, String token){
         validateUpdateRequest(updateRequest);
         if(updateRequest.getAction().equals(FriendRequestAction.ACCEPT))
-            enterAcceptProcedure(updateRequest,token);
+            accept(updateRequest,token);
         else
-            enterRejectProcedure(updateRequest, token);
+            reject(updateRequest, token);
     }
 
     private void validateUpdateRequest(CreateFriendRequestUpdate updateRequest){
@@ -87,9 +83,20 @@ public class FriendServiceImpl implements FriendService{
             throw new ApiRequestException("Invalid update on the friend request.");
     }
 
-    private void enterAcceptProcedure(CreateFriendRequestUpdate updateRequest, String token){
-        List<Friend> friendRequests = getAllUserFriendRequests(jwtService.extractUserId(token));
-        acceptFriendRequest(updateRequest.getSenderId(), friendRequests);
+    private void accept(CreateFriendRequestUpdate requestUpdate, String token){
+        updateRequestStatus(parseFriendRequest(
+                requestUpdate.getSenderId(),
+                getAllUserFriendRequests(jwtService.extractUserId(token))
+        ));
+    }
+
+    private Friend parseFriendRequest(Long senderId, List<Friend> friendRequests){
+        for(Friend friendRequest : friendRequests){
+            if(Objects.equals(friendRequest.getSenderId(), senderId)) {
+                return friendRequest;
+            }
+        }
+        throw new ApiRequestException("Searched friend request does not exist.");
     }
 
     private List<Friend> getAllUserFriendRequests(Long userId){
@@ -97,34 +104,16 @@ public class FriendServiceImpl implements FriendService{
                 .orElseThrow(() -> new ApiRequestException("No friend requests to fetch."));
     }
 
-    private void acceptFriendRequest(Long senderId, List<Friend> friendRequests){
-        for(Friend friendRequest : friendRequests){
-            if(Objects.equals(friendRequest.getSenderId(), senderId)) {
-                updateRequestStatus(friendRequest);
-                return;
-            }
-        }
-        throw new ApiRequestException("Searched friend request does not exist.");
-    }
-
     private void updateRequestStatus(Friend friendRequest){
         friendRequest.setStatus(RequestStatus.ACCEPTED);
         friendRepository.save(friendRequest);
     }
 
-    private void enterRejectProcedure(CreateFriendRequestUpdate updateRequest, String token){
-        List<Friend> friendRequests = getAllUserFriendRequests(jwtService.extractUserId(token));
-        rejectFriendRequest(updateRequest.getSenderId(), friendRequests);
-    }
-
-    private void rejectFriendRequest(Long senderId, List<Friend> friendRequests){
-        for(Friend friendRequest : friendRequests){
-            if(Objects.equals(friendRequest.getSenderId(), senderId)) {
-                friendRepository.delete(friendRequest);
-                return;
-            }
-        }
-        throw new ApiRequestException("Searched friend request does not exist.");
+    private void reject(CreateFriendRequestUpdate updateRequest, String token){
+        friendRepository.delete(parseFriendRequest(
+                updateRequest.getSenderId(),
+                getAllUserFriendRequests(jwtService.extractUserId(token))
+        ));
     }
 
 }
