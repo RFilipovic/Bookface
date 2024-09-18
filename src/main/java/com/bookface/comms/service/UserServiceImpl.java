@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
         authenticateLoginRequest(loginRequest);
         return userRepository
                 .findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new ApiRequestException("Username does not exist."));
+                .orElseThrow(() -> new ApiRequestException("User does not exist."));
     }
 
     private void authenticateLoginRequest(CreateLoginRequest loginRequest) {

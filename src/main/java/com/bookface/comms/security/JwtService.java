@@ -60,10 +60,7 @@ public class JwtService {
 
     public Long extractUserId(String token){
         Integer userIdInteger = extractClaim(token, claims -> claims.get("user_id", Integer.class));
-        Long userIdLong = userIdInteger.longValue();
-        System.out.println("Extracted User ID (Integer): " + userIdInteger);
-        System.out.println("Extracted User ID (Long): " + userIdLong);
-        return userIdLong;
+        return userIdInteger.longValue();
     }
 
     public Date extractExpiration(String token){

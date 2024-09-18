@@ -18,11 +18,11 @@ public class Friend {
     @Column(name = "friendship_id")
     private Long friendshipId;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "sender_id")
+    private Long senderId;
 
-    @Column(name = "friend_id")
-    private Long friendId;
+    @Column(name = "recipient_id")
+    private Long recipientId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
